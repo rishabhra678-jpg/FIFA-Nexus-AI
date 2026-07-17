@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { API_BASE_URL } from "@/config";
 import { 
   LayoutDashboard, UserCheck, ShieldAlert, SlidersHorizontal, 
   MapPin, Route, Leaf, Settings as SettingsIcon, MessageSquare, 
@@ -24,7 +25,7 @@ export default function Layout({ children }: LayoutProps) {
   useEffect(() => {
     const checkWS = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/v1/telemetry");
+        const res = await fetch(`${API_BASE_URL}/api/v1/telemetry`);
         setWsConnected(res.ok);
       } catch {
         setWsConnected(false);

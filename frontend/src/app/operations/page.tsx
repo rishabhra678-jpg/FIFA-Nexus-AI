@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { API_BASE_URL } from "@/config";
 import { SlidersHorizontal, FileText, Volume2, ShieldAlert, CheckCircle, RefreshCw, Layers } from "lucide-react";
 
 export default function OperationsCenter() {
@@ -18,7 +19,7 @@ export default function OperationsCenter() {
   const handleGenerateDailyReport = async () => {
     setLoadingReport(true);
     try {
-      const res = await fetch("http://localhost:8000/api/v1/reports/daily", { method: "POST" });
+      const res = await fetch(`${API_BASE_URL}/api/v1/reports/daily`, { method: "POST" });
       if (res.ok) {
         const data = await res.json();
         setDailyReport(data);
@@ -52,7 +53,7 @@ export default function OperationsCenter() {
   const handleGenerateAnnouncement = async () => {
     setLoadingAnnounce(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/reports/announcement?type=${announcementType}`, { method: "POST" });
+      const res = await fetch(`${API_BASE_URL}/api/v1/reports/announcement?type=${announcementType}`, { method: "POST" });
       if (res.ok) {
         const data = await res.json();
         setAnnouncementOutput(data);
@@ -82,7 +83,7 @@ export default function OperationsCenter() {
   const handleGenerateEmergencyPlan = async () => {
     setLoadingEmergency(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/reports/emergency?location=${emergencyLocation}`, { method: "POST" });
+      const res = await fetch(`${API_BASE_URL}/api/v1/reports/emergency?location=${emergencyLocation}`, { method: "POST" });
       if (res.ok) {
         const data = await res.json();
         setEmergencyOutput(data);

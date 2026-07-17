@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/config";
 import { ShieldAlert, AlertOctagon, Activity, FileText, CheckCircle, Shield, PlusCircle, RefreshCw } from "lucide-react";
 
 export interface Incident {
@@ -28,7 +29,7 @@ export default function SecurityCenter() {
 
   const fetchIncidents = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/incidents");
+      const res = await fetch(`${API_BASE_URL}/api/v1/incidents`);
       if (res.ok) {
         const data = await res.json();
         setIncidents(data);
@@ -73,7 +74,7 @@ export default function SecurityCenter() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/incidents", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/incidents`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, location, severity, description, reporter: "Security" })
@@ -112,7 +113,7 @@ export default function SecurityCenter() {
 
   const handleResolveIncident = async (id: string) => {
     try {
-      await fetch(`http://localhost:8000/api/v1/incidents/${id}/resolve`, { method: "POST" });
+      await fetch(`${API_BASE_URL}/api/v1/incidents/${id}/resolve`, { method: "POST" });
       fetchIncidents();
     } catch {
       setIncidents(prev => prev.map(inc => inc.id === id ? { ...inc, status: "Resolved" } : inc));

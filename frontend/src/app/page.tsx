@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { API_BASE_URL } from "@/config";
 import { motion } from "framer-motion";
 import { 
   ShieldCheck, Zap, Radio, Globe, Compass, 
@@ -35,7 +36,7 @@ export default function LandingPage() {
         </div>
         <div className="flex gap-4">
           <a 
-            href="http://localhost:8000/docs" 
+            href={`${API_BASE_URL}/docs`} 
             target="_blank" 
             rel="noreferrer"
             className="hidden sm:flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white glass-card"
@@ -185,7 +186,7 @@ export default function LandingPage() {
         <div className="flex gap-4 justify-center">
           <a href="#" className="hover:text-slate-300">Privacy Policy</a>
           <a href="#" className="hover:text-slate-300">Terms of Use</a>
-          <a href="http://localhost:8000/docs" target="_blank" rel="noreferrer" className="hover:text-slate-300">API Gateway</a>
+          <a href={`${API_BASE_URL}/docs`} target="_blank" rel="noreferrer" className="hover:text-slate-300">API Gateway</a>
         </div>
       </footer>
     </div>

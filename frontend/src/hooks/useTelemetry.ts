@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { API_BASE_URL } from "@/config";
 
 export interface SeatingZone {
   name: string;
@@ -115,11 +116,16 @@ export function useTelemetry() {
     let mockInterval: NodeJS.Timeout;
 
     const connectWS = () => {
-      // Find window host to connect dynamically
-      const wsUrl = `ws://localhost:8000/ws/telemetry`;
+      // Dynamically resolve backend API and WebSocket endpoints
+      const apiUrl = API_BASE_URL;
+      const wsProto = apiUrl.startsWith("https") ? "wss" : "ws";
+      const wsHost = apiUrl.replace(/^https?:\/\//, "");
+      const wsUrl = `${wsProto}://${wsHost}/ws/telemetry`;
+      
       console.log(`Connecting to WebSocket: ${wsUrl}`);
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
+
 
       ws.onopen = () => {
         setIsConnected(true);
@@ -195,7 +201,7 @@ export function useTelemetry() {
 
   const triggerSimulation = async (scenarioType: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/simulate`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/simulate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ scenario_type: scenarioType })
@@ -204,7 +210,7 @@ export function useTelemetry() {
         const result = await response.json();
         setActiveSimulation(scenarioType);
         // Instantly fetch updated state
-        const telRes = await fetch(`http://localhost:8000/api/v1/telemetry`);
+        const telRes = await fetch(`${API_BASE_URL}/api/v1/telemetry`);
         if (telRes.ok) {
           const newState = await telRes.json();
           setTelemetry(newState);
@@ -219,7 +225,7 @@ export function useTelemetry() {
 
   const clearSimulation = async () => {
     try {
-      await fetch(`http://localhost:8000/api/v1/simulate/clear`, { method: "POST" });
+      await fetch(`${API_BASE_URL}/api/v1/simulate/clear`, { method: "POST" });
     } catch (e) {
       console.warn("Backend unavailable to clear simulation. Performing client-side reset.", e);
     }

@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from "@/config";
 import { Settings as SettingsIcon, Eye, Type, Shield, Server, RefreshCw } from "lucide-react";
 
 export default function Settings() {
   const [contrast, setContrast] = useState(false);
   const [largeText, setLargeText] = useState(false);
   const [apiKey, setApiKey] = useState("");
-  const [backendUrl, setBackendUrl] = useState("http://localhost:8000");
+  const [backendUrl, setBackendUrl] = useState(API_BASE_URL);
 
   useEffect(() => {
     setContrast(document.body.classList.contains("high-contrast"));

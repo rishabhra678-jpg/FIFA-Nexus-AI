@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { API_BASE_URL } from "@/config";
 import { UserCheck, Shield, HelpCircle, FileText, CheckSquare, Search, ClipboardList, MapPin } from "lucide-react";
 
 export default function VolunteerPortal() {
@@ -35,7 +36,7 @@ export default function VolunteerPortal() {
     ]);
     
     // Push alert to backend
-    fetch("http://localhost:8000/api/v1/incidents", {
+    fetch(`${API_BASE_URL}/api/v1/incidents`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
