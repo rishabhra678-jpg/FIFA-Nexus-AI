@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-slate-100 font-sans antialiased overflow-x-hidden;
+    background-image: 
+      radial-gradient(circle at 10% 20%, rgba(233, 27, 76, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(0, 242, 254, 0.06) 0%, transparent 45%),
+      radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.04) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  /* Premium Glassmorphic Cards */
+  .glass-card {
+    @apply bg-card border border-card-border rounded-xl backdrop-blur-md transition-all duration-300;
+  }
+  
+  .glass-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Cybermatic glowing indicators */
+  .cyber-glow-cyan {
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.25);
+    border-color: rgba(0, 242, 254, 0.4);
+  }
+  
+  .cyber-glow-red {
+    box-shadow: 0 0 15px rgba(233, 27, 76, 0.35);
+    border-color: rgba(233, 27, 76, 0.5);
+  }
+
+  .cyber-glow-gold {
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+    border-color: rgba(212, 175, 55, 0.4);
+  }
+
+  /* Cyber Grid Background overlay */
+  .grid-overlay {
+    background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), 
+                      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
+
+/* Accessibility Modes (Controlled via body class) */
+
+/* High Contrast Mode */
+.high-contrast {
+  --background: #000000;
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .glass-card {
+  background: #000000 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+.high-contrast button, 
+.high-contrast a {
+  border: 2px solid #ffffff !important;
+  background: #000000 !important;
+  color: #ffff00 !important; /* High contrast yellow */
+}
+
+.high-contrast button:hover,
+.high-contrast a:hover {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.high-contrast text,
+.high-contrast span,
+.high-contrast h1,
+.high-contrast h2,
+.high-contrast h3,
+.high-contrast p {
+  color: #ffffff !important;
+}
+
+/* Large Font Scale Mode */
+.large-text {
+  font-size: 1.15rem !important;
+}
+
+.large-text h1 {
+  font-size: 2.75rem !important;
+}
+
+.large-text h2 {
+  font-size: 2rem !important;
+}
+
+.large-text h3 {
+  font-size: 1.5rem !important;
+}
+
+.large-text p, 
+.large-text span, 
+.large-text li, 
+.large-text button,
+.large-text input {
+  font-size: 1.1rem !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 22, 38, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

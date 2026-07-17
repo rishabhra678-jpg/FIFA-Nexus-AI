@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIFA Nexus AI – Stadium Intelligence Copilot</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            background: "#080b11",
+            card: "rgba(22, 28, 45, 0.4)",
+            cardSolid: "#0f1626",
+            cardBorder: "rgba(255, 255, 255, 0.08)",
+            brandRed: "#e91b4c",
+            brandGold: "#d4af37",
+            brandCyan: "#00f2fe",
+            brandEmerald: "#10b981",
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #080b11;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(233, 27, 76, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 242, 254, 0.06) 0%, transparent 45%);
+      background-attachment: fixed;
+    }
+    h1, h2, h3, .font-tech {
+      font-family: 'Orbitron', sans-serif;
+    }
+    .glass-card {
+      background: rgba(22, 28, 45, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+    }
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+    .grid-overlay {
+      background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), 
+                        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 22, 38, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    /* Accessibility Classes */
+    .high-contrast {
+      background: #000000 !important;
+      color: #ffffff !important;
+    }
+    .high-contrast .glass-card {
+      background: #000000 !important;
+      border: 2px solid #ffffff !important;
+      color: #ffffff !important;
+    }
+    .high-contrast button, .high-contrast input, .high-contrast select, .high-contrast textarea {
+      border: 2px solid #ffffff !important;
+      background: #000000 !important;
+      color: #ffff00 !important;
+    }
+    .large-text {
+      font-size: 1.15rem !important;
+    }
+    .large-text h1 { font-size: 2.5rem !important; }
+    .large-text h2 { font-size: 1.8rem !important; }
+  </style>
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col md:flex-row grid-overlay">
+
+  <!-- Sidebar Navigation -->
+  <aside class="w-full md:w-64 xl:w-72 bg-[#0f1626] border-r border-cardBorder p-6 flex flex-col justify-between flex-shrink-0">
+    <div class="space-y-8">
+      <!-- Logo Branding -->
+      <div class="flex items-center gap-3 border-b border-cardBorder pb-6">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brandRed via-brandGold to-brandCyan flex items-center justify-center font-bold text-white shadow-lg">F</div>
+        <div>
+          <h1 class="font-extrabold text-sm tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-brandRed via-brandGold to-brandCyan">FIFA NEXUS</h1>
+          <p class="text-[9px] text-slate-400 font-mono tracking-widest uppercase">Stadium Intelligence</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="space-y-1" id="nav-tabs">
+        <button onclick="switchTab('dashboard')" id="btn-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-semibold uppercase tracking-wider text-white bg-gradient-to-r from-brandRed/10 to-brandGold/10 border-l-2 border-brandRed">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 text-brandRed"></i> Command Dashboard
+        </button>
+        <button onclick="switchTab('fan')" id="btn-fan" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-400 hover:bg-slate-800/40 hover:text-white">
+          <i data-lucide="map-pin" class="w-4 h-4"></i> Fan Assistant
+        </button>
+        <button onclick="switchTab('volunteer')" id="btn-volunteer" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-400 hover:bg-slate-800/40 hover:text-white">
+          <i data-lucide="user-check" class="w-4 h-4"></i> Volunteer Portal
+        </button>
+        <button onclick="switchTab('security')" id="btn-security" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-400 hover:bg-slate-800/40 hover:text-white">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i> Security Center
+        </button>
+        <button onclick="switchTab('operations')" id="btn-operations" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-400 hover:bg-slate-800/40 hover:text-white">
+          <i data-lucide="sliders" class="w-4 h-4"></i> Operations Center
+        </button>
+        <button onclick="switchTab('chat')" id="btn-chat" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-400 hover:bg-slate-800/40 hover:text-white">
+          <i data-lucide="message-square" class="w-4 h-4"></i> AI Chat Console
+        </button>
+        <button onclick="switchTab('settings')" id="btn-settings" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-semibold uppercase tracking-wider text-slate-400 hover:bg-slate-800/40 hover:text-white">
+          <i data-lucide="settings" class="w-4 h-4"></i> Control Settings
+        </button>
+      </nav>
+    </div>
+
+    <!-- Accessibility & WebSockets controls -->
+    <div class="space-y-4 pt-6 border-t border-cardBorder">
+      <div class="flex gap-2">
+        <button onclick="toggleContrast()" class="flex-1 p-2 rounded bg-slate-900 hover:bg-slate-850 border border-cardBorder text-[10px] font-bold text-slate-300 flex items-center justify-center gap-1">
+          <i data-lucide="eye" class="w-3.5 h-3.5"></i> Contrast
+        </button>
+        <button onclick="toggleTextSize()" class="flex-1 p-2 rounded bg-slate-900 hover:bg-slate-850 border border-cardBorder text-[10px] font-bold text-slate-300 flex items-center justify-center gap-1">
+          <i data-lucide="type" class="w-3.5 h-3.5"></i> Text Size
+        </button>
+      </div>
+      <div class="flex justify-between items-center p-3 rounded bg-slate-950 border border-cardBorder font-mono text-[10px]">
+        <span class="text-slate-500">Live Telemetry:</span>
+        <span id="ws-badge" class="text-brandGold font-bold uppercase flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-brandGold animate-pulse"></span> Offline
+        </span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main View Container -->
+  <main class="flex-grow p-6 space-y-6 overflow-y-auto">
+    
+    <!-- 1. DASHBOARD TAB VIEW -->
+    <div id="tab-dashboard" class="tab-content space-y-6">
+      
+      <!-- HUD Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card p-4 rounded-xl relative overflow-hidden flex justify-between items-center">
+          <div>
+            <span class="text-[9px] font-mono text-slate-400 uppercase tracking-widest block">Total Spectators</span>
+            <div id="stat-attendance" class="text-xl font-bold font-tech text-white">68,200</div>
+            <span id="stat-attendance-pct" class="text-[9px] text-brandGold font-mono">90.9% Capacity</span>
+          </div>
+          <div class="p-3 bg-brandRed/10 text-brandRed rounded-lg"><i data-lucide="users" class="w-5 h-5"></i></div>
+        </div>
+
+        <div class="glass-card p-4 rounded-xl relative overflow-hidden flex justify-between items-center">
+          <div>
+            <span class="text-[9px] font-mono text-slate-400 uppercase tracking-widest block">Active Incidents</span>
+            <div id="stat-incidents" class="text-xl font-bold font-tech text-brandEmerald">2</div>
+            <span class="text-[9px] text-slate-500 font-mono">Operations dispatching</span>
+          </div>
+          <div class="p-3 bg-brandRed/10 text-brandRed rounded-lg"><i data-lucide="alert-octagon" class="w-5 h-5"></i></div>
+        </div>
+
+        <div class="glass-card p-4 rounded-xl relative overflow-hidden flex justify-between items-center">
+          <div>
+            <span class="text-[9px] font-mono text-slate-400 uppercase tracking-widest block">Crowd Density Index</span>
+            <div id="stat-density" class="text-xl font-bold font-tech text-white">0.65</div>
+            <span class="text-[9px] text-brandCyan font-mono">Risk Threshold: &lt; 0.85</span>
+          </div>
+          <div class="p-3 bg-brandCyan/10 text-brandCyan rounded-lg"><i data-lucide="activity" class="w-5 h-5"></i></div>
+        </div>
+
+        <div class="glass-card p-4 rounded-xl relative overflow-hidden flex justify-between items-center">
+          <div>
+            <span class="text-[9px] font-mono text-slate-400 uppercase tracking-widest block">Clean Energy Draw</span>
+            <div id="stat-energy" class="text-xl font-bold font-tech text-brandEmerald">4,820 kWh</div>
+            <span class="text-[9px] text-slate-500 font-mono">Solar cells running</span>
+          </div>
+          <div class="p-3 bg-brandEmerald/10 text-brandEmerald rounded-lg"><i data-lucide="leaf" class="w-5 h-5"></i></div>
+        </div>
+      </div>
+
+      <!-- Grid columns: Map & Side panel -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Interactive Stadium Map -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="glass-card p-5 rounded-xl flex flex-col h-full">
+            <div class="flex justify-between items-center border-b border-cardBorder pb-3">
+              <div>
+                <h3 class="font-bold text-xs uppercase tracking-wider text-white">Stadium Floor Layout & Live Heatmaps</h3>
+                <p class="text-[9px] text-slate-500 font-mono">Hover sections or click gate markers</p>
+              </div>
+            </div>
+            
+            <div class="flex-grow flex items-center justify-center p-4 bg-slate-950/80 rounded-xl border border-cardBorder mt-4 min-h-[300px]">
+              <!-- Live SVG Map -->
+              <svg viewBox="0 0 500 450" class="w-full max-h-[360px]">
+                <ellipse cx="250" cy="200" rx="180" ry="135" fill="none" stroke="#222f4d" stroke-width="4" />
+                <ellipse cx="250" cy="200" rx="140" ry="90" fill="none" stroke="#10b981" stroke-width="1.5" stroke-opacity="0.3" />
+                
+                <!-- Stands -->
+                <path d="M 120 120 C 180 85, 320 85, 380 120 L 350 145 C 310 125, 190 125, 150 145 Z" fill="rgba(0, 242, 254, 0.06)" stroke="#222f4d" stroke-width="1" class="hover:fill-brandCyan/20 cursor-pointer" onclick="showMapHUD('North Stand', 'Capacity: 18,000 | Occupancy: 15,200 | Risk: Low')" />
+                <path d="M 120 280 C 180 315, 320 315, 380 280 L 350 255 C 310 275, 190 275, 150 255 Z" id="map-south-stand" fill="rgba(212, 175, 55, 0.06)" stroke="#222f4d" stroke-width="1" class="hover:fill-brandGold/20 cursor-pointer" onclick="showMapHUD('South Stand', 'Capacity: 18,000 | Occupancy: 17,800 | Risk: Medium')" />
+                
+                <circle cx="280" cy="275" r="10" fill="#ef4444" fill-opacity="0.25" class="animate-pulse" />
+                <circle cx="280" cy="275" r="3.5" fill="#ef4444" />
+                
+                <!-- Gate Markers -->
+                <g class="cursor-pointer" onclick="clickGate('Gate A')">
+                  <circle cx="250" cy="40" r="12" fill="#0f1626" stroke="#00f2fe" stroke-width="2" />
+                  <text x="250" y="44" fill="#00f2fe" text-anchor="middle" font-size="9" font-weight="bold">A</text>
+                </g>
+                <g class="cursor-pointer" onclick="clickGate('Gate B')">
+                  <circle cx="45" cy="200" r="12" fill="#0f1626" stroke="#d4af37" stroke-width="2" />
+                  <text x="45" y="204" fill="#d4af37" text-anchor="middle" font-size="9" font-weight="bold">B</text>
+                </g>
+                <g class="cursor-pointer" id="map-gate-c" onclick="clickGate('Gate C')">
+                  <circle cx="250" cy="360" r="12" fill="#0f1626" stroke="#d4af37" stroke-width="2" />
+                  <text x="250" y="364" id="map-gate-c-txt" fill="#d4af37" text-anchor="middle" font-size="9" font-weight="bold">C</text>
+                </g>
+                <g class="cursor-pointer" onclick="clickGate('Gate D')">
+                  <circle cx="455" cy="200" r="12" fill="#0f1626" stroke="#00f2fe" stroke-width="2" />
+                  <text x="455" y="204" fill="#00f2fe" text-anchor="middle" font-size="9" font-weight="bold">D</text>
+                </g>
+              </svg>
+            </div>
+            
+            <div id="map-hud" class="p-3 bg-slate-900 border border-cardBorder rounded-lg text-xs mt-3 hidden">
+              <span id="map-hud-title" class="font-bold text-brandGold uppercase block mb-1"></span>
+              <p id="map-hud-desc" class="text-slate-300 font-mono"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side Panel: Simulator & Alerts -->
+        <div class="lg:col-span-5 space-y-6">
+          
+          <!-- What-If Simulator -->
+          <div class="glass-card p-5 rounded-xl space-y-4">
+            <div class="flex justify-between items-center border-b border-cardBorder pb-2">
+              <div>
+                <h3 class="font-bold text-xs uppercase tracking-wider text-white">What-If Stress Simulator</h3>
+                <p class="text-[9px] text-slate-500 font-mono">Test stadium security scenarios</p>
+              </div>
+              <button onclick="clearActiveSimulation()" id="btn-clear-sim" class="hidden px-2 py-0.5 rounded bg-brandRed/20 border border-brandRed/30 text-brandRed text-[9px] font-mono">Reset</button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2 text-[10px] font-mono">
+              <button onclick="triggerSim('gate_closure')" class="p-2 bg-slate-950 hover:bg-slate-900 border border-cardBorder rounded text-left flex justify-between items-center">
+                <span>Gate C Closes</span> <i data-lucide="play" class="w-3 h-3"></i>
+              </button>
+              <button onclick="triggerSim('rain')" class="p-2 bg-slate-950 hover:bg-slate-900 border border-cardBorder rounded text-left flex justify-between items-center">
+                <span>Storm Starts</span> <i data-lucide="play" class="w-3 h-3"></i>
+              </button>
+              <button onclick="triggerSim('metro_shutdown')" class="p-2 bg-slate-950 hover:bg-slate-900 border border-cardBorder rounded text-left flex justify-between items-center">
+                <span>Metro Line 2 Off</span> <i data-lucide="play" class="w-3 h-3"></i>
+              </button>
+              <button onclick="triggerSim('attendance_surge')" class="p-2 bg-slate-950 hover:bg-slate-900 border border-cardBorder rounded text-left flex justify-between items-center">
+                <span>+30% Surging</span> <i data-lucide="play" class="w-3 h-3"></i>
+              </button>
+            </div>
+
+            <!-- Simulation report output -->
+            <div id="sim-report" class="p-3 bg-slate-950 rounded border border-cardBorder text-xs space-y-2 hidden">
+              <span class="text-brandGold font-bold uppercase text-[10px] tracking-wide block" id="sim-report-name"></span>
+              <p class="text-slate-300 font-mono text-[11px] leading-relaxed" id="sim-report-plan"></p>
+            </div>
+          </div>
+
+          <!-- Live Alerts -->
+          <div class="glass-card p-5 rounded-xl space-y-3">
+            <h3 class="font-bold text-xs uppercase tracking-wider text-white">Live AI Notifications</h3>
+            <div id="alerts-log" class="space-y-2.5 max-h-[200px] overflow-y-auto pr-1">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. FAN ASSISTANT VIEW -->
+    <div id="tab-fan" class="tab-content hidden space-y-6">
+      <div>
+        <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="map-pin" class="w-6 h-6 text-brandRed"></i> Fan Companion Console</h2>
+        <p class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">Seat direction locator and concession queues</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass-card p-5 space-y-4">
+          <h3 class="font-bold text-xs uppercase tracking-wider text-white">Find Your Seat</h3>
+          <div class="flex gap-2">
+            <input type="text" id="fan-seat-input" value="Section 104" placeholder="Enter seat stand..." class="flex-grow px-3 py-2 rounded bg-slate-950 border border-cardBorder text-xs font-mono" />
+            <button onclick="lookupSeatRoute()" class="px-4 py-2 bg-brandRed hover:bg-brandRed/80 rounded text-xs font-bold font-mono text-white">Lookup Path</button>
+          </div>
+          <div id="fan-seat-output" class="p-3 bg-slate-950 rounded border border-cardBorder text-xs hidden"></div>
+        </div>
+
+        <div class="glass-card p-5 space-y-3">
+          <h3 class="font-bold text-xs uppercase text-white tracking-wider">Concession wait lines</h3>
+          <div class="space-y-2 font-mono text-xs text-slate-300">
+            <div class="p-2.5 bg-slate-900/60 rounded border border-cardBorder flex justify-between">
+              <span>Taco Fiesta (Sec 108)</span> <strong class="text-brandEmerald">4 mins wait</strong>
+            </div>
+            <div class="p-2.5 bg-slate-900/60 rounded border border-cardBorder flex justify-between">
+              <span>Stadium Grill (Sec 104)</span> <strong class="text-brandGold">12 mins wait (15% Visa Disc)</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. VOLUNTEER PORTAL VIEW -->
+    <div id="tab-volunteer" class="tab-content hidden space-y-6">
+      <div>
+        <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="user-check" class="w-6 h-6 text-brandGold"></i> Volunteer Copilot Command</h2>
+        <p class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">Incident logger SOP and missing child Amber wizard</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Amber Lockdown Wizard -->
+        <div class="glass-card p-5 space-y-4">
+          <h3 class="font-bold text-xs text-white uppercase tracking-wider">Code Amber Missing Child Wizard</h3>
+          
+          <div class="space-y-3 font-mono text-xs" id="amber-form">
+            <div>
+              <label class="block text-slate-400 text-[9px] mb-1">Visual Clothing Descriptors</label>
+              <input type="text" id="amber-desc" value="Blue shirt, khaki shorts, age 6" class="w-full px-3 py-2 rounded bg-slate-950 border border-cardBorder" />
+            </div>
+            <div>
+              <label class="block text-slate-400 text-[9px] mb-1">Last Seen Near</label>
+              <input type="text" id="amber-loc" value="Section 104 Concourse" class="w-full px-3 py-2 rounded bg-slate-950 border border-cardBorder" />
+            </div>
+            <button onclick="triggerAmberLockdown()" class="w-full py-2 bg-brandGold text-slate-950 font-bold rounded uppercase">Trigger Amber Alert</button>
+          </div>
+
+          <div id="amber-active-pane" class="p-3 bg-brandRed/15 border border-brandRed/30 rounded text-xs space-y-2 hidden">
+            <span class="text-brandRed font-bold animate-pulse block uppercase tracking-wider text-[10px]">CODE AMBER IS ACTIVE</span>
+            <p id="amber-active-details" class="text-slate-300 font-mono"></p>
+            <button onclick="cancelAmberLockdown()" class="px-2 py-1 rounded bg-slate-900 border border-cardBorder font-bold text-[9px]">Cancel Alert</button>
+          </div>
+        </div>
+
+        <div class="glass-card p-5 space-y-3">
+          <h3 class="font-bold text-xs text-white uppercase tracking-wider">Duties Checklist</h3>
+          <div class="space-y-2 font-mono text-xs">
+            <label class="flex items-center gap-2 p-2 rounded bg-slate-900/60 border border-cardBorder cursor-pointer">
+              <input type="checkbox" checked /> <span>Verify elevator priority override key blocks</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded bg-slate-900/60 border border-cardBorder cursor-pointer">
+              <input type="checkbox" /> <span>Deploy wet floor signs to Concourse Kiosk 3</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. SECURITY CENTER VIEW -->
+    <div id="tab-security" class="tab-content hidden space-y-6">
+      <div>
+        <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="shield-alert" class="w-6 h-6 text-brandRed"></i> Security Intelligence Room</h2>
+        <p class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">Hazard reporting and automated AI dispatches</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <div class="lg:col-span-5 glass-card p-5 space-y-4">
+          <h3 class="font-bold text-xs text-white uppercase tracking-wider">Report Security Incident</h3>
+          <div class="space-y-3 font-mono text-xs">
+            <div>
+              <label class="block text-slate-400 text-[9px] mb-1">Incident Title</label>
+              <input type="text" id="inc-title" placeholder="e.g. Altercation" class="w-full px-3 py-2 rounded bg-slate-950 border border-cardBorder" />
+            </div>
+            <div>
+              <label class="block text-slate-400 text-[9px] mb-1">Location Section</label>
+              <input type="text" id="inc-loc" placeholder="e.g. Section 202" class="w-full px-3 py-2 rounded bg-slate-950 border border-cardBorder" />
+            </div>
+            <div>
+              <label class="block text-slate-400 text-[9px] mb-1">Description</label>
+              <textarea id="inc-desc" placeholder="Details..." class="w-full px-3 py-2 rounded bg-slate-950 border border-cardBorder h-16"></textarea>
+            </div>
+            <button onclick="dispatchIncident()" class="w-full py-2 bg-brandRed text-white font-bold rounded uppercase">Dispatch AI Responder</button>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 glass-card p-5 space-y-3">
+          <h3 class="font-bold text-xs text-white uppercase tracking-wider">Active Incident Registry</h3>
+          <div id="security-inc-list" class="space-y-3 font-mono text-xs">
+            <!-- Populated via python GET request -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. OPERATIONS CENTER VIEW -->
+    <div id="tab-operations" class="tab-content hidden space-y-6">
+      <div>
+        <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="sliders" class="w-6 h-6 text-brandRed"></i> Operations & PA Broadcast Center</h2>
+        <p class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">Announcements compiler and daily logs creator</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- PA Broadcast -->
+        <div class="glass-card p-5 space-y-4">
+          <h3 class="font-bold text-xs text-white uppercase tracking-wider">AI Public Address compiler</h3>
+          <div class="space-y-3 font-mono text-xs">
+            <select id="pa-type" class="w-full px-3 py-2 rounded bg-slate-950 border border-cardBorder text-slate-300">
+              <option value="weather">Weather Announcement</option>
+              <option value="gate_redirect">Gate C Crowd Redirection</option>
+              <option value="emergency">Evacuation Directive</option>
+            </select>
+            <button onclick="compilePAAnnouncement()" class="w-full py-2 bg-brandCyan text-slate-950 font-bold rounded uppercase">Compile Speech Script</button>
+          </div>
+          <div id="pa-output" class="p-3 bg-slate-950 rounded border border-cardBorder text-xs hidden font-mono"></div>
+        </div>
+
+        <!-- Daily Briefing -->
+        <div class="glass-card p-5 space-y-4">
+          <h3 class="font-bold text-xs text-white uppercase tracking-wider">Daily Operations briefing</h3>
+          <button onclick="compileDailyBriefing()" class="px-4 py-2 bg-brandGold text-slate-950 font-bold rounded text-xs font-mono uppercase">Generate briefing Report</button>
+          <div id="briefing-output" class="p-3 bg-slate-950 rounded border border-cardBorder text-xs hidden font-mono space-y-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. AI CHAT CONSOLE VIEW -->
+    <div id="tab-chat" class="tab-content hidden flex flex-col h-[calc(100vh-120px)] space-y-4">
+      <div class="border-b border-cardBorder pb-3 flex justify-between items-center">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="message-square" class="w-6 h-6 text-brandRed"></i> Multi-Agent Conversation Playground</h2>
+        </div>
+        <select id="chat-agent" class="px-3 py-1 rounded bg-[#0f1626] border border-cardBorder font-mono text-xs text-brandGold font-bold">
+          <option value="Fan">Fan AI Assistant</option>
+          <option value="Volunteer">Volunteer Copilot</option>
+          <option value="Security">Security AI</option>
+          <option value="Operations">Operations Director</option>
+          <option value="Accessibility">Accessibility Assistant</option>
+          <option value="Sustainability">Sustainability Auditor</option>
+          <option value="Transport">Transportation Planner</option>
+        </select>
+      </div>
+
+      <div class="flex-grow overflow-y-auto space-y-4 p-4 bg-slate-950/60 rounded-xl border border-cardBorder" id="chat-logs">
+        <div class="flex flex-col items-start gap-1">
+          <span class="text-[9px] font-mono text-slate-500 uppercase">AI Copilot Node</span>
+          <div class="p-3 rounded-lg bg-brandRed/5 border border-brandRed/10 text-slate-300 font-mono text-xs max-w-[80%]">
+            FIFA Stadium Copilot stands ready. Select an agent department from the top-right select box to query rules, coordinates, or alerts.
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <input type="text" id="chat-input" placeholder="Query agent..." onkeydown="if(event.key === 'Enter') submitChatQuery()" class="flex-grow px-4 py-2.5 rounded-lg bg-slate-950 border border-cardBorder text-xs font-mono focus:outline-none focus:border-brandRed" />
+        <button onclick="submitChatQuery()" class="p-3 bg-brandRed hover:bg-brandRed/80 rounded-lg text-white"><i data-lucide="send" class="w-4 h-4"></i></button>
+      </div>
+    </div>
+
+    <!-- 7. CONTROL SETTINGS VIEW -->
+    <div id="tab-settings" class="tab-content hidden space-y-6">
+      <div>
+        <h2 class="text-xl font-bold text-white flex items-center gap-2"><i data-lucide="settings" class="w-6 h-6 text-brandGold"></i> System settings & profile</h2>
+        <p class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">Accessibility mode configuration</p>
+      </div>
+
+      <div class="glass-card p-5 rounded-xl space-y-4 max-w-lg">
+        <h3 class="font-bold text-xs text-white uppercase tracking-wider border-b border-cardBorder pb-2">Layout preferences</h3>
+        
+        <div class="space-y-3 font-mono text-xs">
+          <div class="flex justify-between items-center p-3 bg-slate-900 border border-cardBorder rounded-lg">
+            <div>
+              <span class="font-bold text-white block">High Contrast Mode</span>
+              <p class="text-slate-400 text-[10px]">Applies stark visibility color styling filters.</p>
+            </div>
+            <button onclick="toggleContrast()" id="btn-contrast-status" class="px-3 py-1 rounded border border-cardBorder bg-slate-950 font-bold">OFF</button>
+          </div>
+
+          <div class="flex justify-between items-center p-3 bg-slate-900 border border-cardBorder rounded-lg">
+            <div>
+              <span class="font-bold text-white block">Text Enlargement scale</span>
+              <p class="text-slate-400 text-[10px]">Increases readability text scale size by 15%.</p>
+            </div>
+            <button onclick="toggleTextSize()" id="btn-text-status" class="px-3 py-1 rounded border border-cardBorder bg-slate-950 font-bold">OFF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Tab switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+      // Set active nav button style
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-gradient-to-r', 'from-brandRed/10', 'to-brandGold/10', 'border-l-2', 'border-brandRed', 'text-white');
+        btn.classList.add('text-slate-400');
+      });
+      const activeBtn = document.getElementById('btn-' + tabId);
+      activeBtn.classList.remove('text-slate-400');
+      activeBtn.classList.add('bg-gradient-to-r', 'from-brandRed/10', 'to-brandGold/10', 'border-l-2', 'border-brandRed', 'text-white');
+    }
+
+    // Accessibility
+    function toggleContrast() {
+      const active = document.body.classList.toggle('high-contrast');
+      document.getElementById('btn-contrast-status').innerText = active ? "ON" : "OFF";
+      if(active) {
+        document.getElementById('btn-contrast-status').classList.add('bg-yellow-500', 'text-black', 'border-yellow-400');
+      } else {
+        document.getElementById('btn-contrast-status').classList.remove('bg-yellow-500', 'text-black', 'border-yellow-400');
+      }
+    }
+    function toggleTextSize() {
+      const active = document.body.classList.toggle('large-text');
+      document.getElementById('btn-text-status').innerText = active ? "ON" : "OFF";
+      if(active) {
+        document.getElementById('btn-text-status').classList.add('bg-brandCyan', 'text-black', 'border-brandCyan');
+      } else {
+        document.getElementById('btn-text-status').classList.remove('bg-brandCyan', 'text-black', 'border-brandCyan');
+      }
+    }
+
+    // Map HUD
+    function showMapHUD(title, desc) {
+      const hud = document.getElementById('map-hud');
+      hud.classList.remove('hidden');
+      document.getElementById('map-hud-title').innerText = title;
+      document.getElementById('map-hud-desc').innerText = desc;
+    }
+    
+    function clickGate(name) {
+      // Query gate statistics from live state
+      fetch('/api/v1/telemetry')
+        .then(res => res.json())
+        .then(data => {
+          const gate = data.gates.find(g => g.name.includes(name));
+          if(gate) {
+            showMapHUD(gate.name, `Status: ${gate.status} | Queue: ${gate.current_queue} people | Wait: ${gate.wait_time_minutes} mins`);
+          }
+        });
+    }
+
+    // WebSockets integration
+    let socket;
+    function connectWebsocket() {
+      const wsUrl = `ws://${window.location.host}/ws/telemetry`;
+      socket = new WebSocket(wsUrl);
+
+      socket.onopen = () => {
+        const badge = document.getElementById('ws-badge');
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-brandEmerald animate-pulse"></span> WS: Live`;
+        badge.className = "text-brandEmerald font-bold uppercase flex items-center gap-1";
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          updateTelemetryUI(data);
+        } catch(e) {
+          console.error("WS parse error", e);
+        }
+      };
+
+      socket.onclose = () => {
+        const badge = document.getElementById('ws-badge');
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-brandGold animate-pulse"></span> Fallback Poll`;
+        badge.className = "text-brandGold font-bold uppercase flex items-center gap-1";
+        // Attempt poll fallback
+        setTimeout(pollTelemetry, 3000);
+      };
+    }
+
+    function pollTelemetry() {
+      fetch('/api/v1/telemetry')
+        .then(res => res.json())
+        .then(data => {
+          updateTelemetryUI(data);
+          if(!socket || socket.readyState === WebSocket.CLOSED) {
+            setTimeout(pollTelemetry, 3000);
+          }
+        })
+        .catch(err => console.error("Poll error", err));
+    }
+
+    function updateTelemetryUI(data) {
+      document.getElementById('stat-attendance').innerText = data.attendance_total.toLocaleString();
+      document.getElementById('stat-attendance-pct').innerText = data.attendance_percentage + "% Capacity";
+      document.getElementById('stat-incidents').innerText = data.active_incidents;
+      document.getElementById('stat-density').innerText = data.crowd_density_overall;
+      document.getElementById('stat-energy').innerText = Math.round(data.sustainability.energy_kwh).toLocaleString() + " kWh";
+
+      // Render alert lists
+      const alertsLog = document.getElementById('alerts-log');
+      alertsLog.innerHTML = "";
+      data.alerts.forEach(alert => {
+        const borderClass = alert.severity === "Critical" ? "border-brandRed bg-brandRed/5 text-slate-200" : "border-cardBorder";
+        alertsLog.innerHTML += `
+          <div class="p-2.5 rounded bg-slate-900/60 border ${borderClass} flex flex-col gap-1 font-mono text-[10px]">
+            <div class="flex justify-between text-brandGold font-bold">
+              <span>${alert.agent.toUpperCase()} AGENT</span>
+              <span class="text-slate-500">${alert.timestamp}</span>
+            </div>
+            <p class="text-slate-300">${alert.message}</p>
+          </div>
+        `;
+      });
+      
+      // Update interactive SVG stands colors based on active simulators
+      const southStand = document.getElementById('map-south-stand');
+      if (data.crowd_density_overall > 0.8) {
+        southStand.setAttribute("fill", "rgba(233, 27, 76, 0.2)");
+      } else {
+        southStand.setAttribute("fill", "rgba(212, 175, 55, 0.06)");
+      }
+      
+      // Update Gate C visual closed markers
+      const gateC = data.gates.find(g => g.name.includes("Gate C"));
+      if(gateC && gateC.status === "Closed") {
+        document.getElementById('map-gate-c').querySelector('circle').setAttribute("stroke", "#ef4444");
+        document.getElementById('map-gate-c-txt').setAttribute("fill", "#ef4444");
+        document.getElementById('map-gate-c-txt').textContent = "X";
+      } else {
+        document.getElementById('map-gate-c').querySelector('circle').setAttribute("stroke", "#d4af37");
+        document.getElementById('map-gate-c-txt').setAttribute("fill", "#d4af37");
+        document.getElementById('map-gate-c-txt').textContent = "C";
+      }
+    }
+
+    // What-if Trigger
+    function triggerSim(type) {
+      fetch('/api/v1/simulate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ scenario_type: type })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('sim-report').classList.remove('hidden');
+        document.getElementById('btn-clear-sim').classList.remove('hidden');
+        document.getElementById('sim-report-name').innerText = data.scenario_name;
+        document.getElementById('sim-report-plan').innerHTML = data.ai_mitigation_plan.replace(/\n/g, "<br/>");
+      });
+    }
+
+    function clearActiveSimulation() {
+      fetch('/api/v1/simulate/clear', { method: 'POST' })
+        .then(() => {
+          document.getElementById('sim-report').classList.add('hidden');
+          document.getElementById('btn-clear-sim').classList.add('hidden');
+        });
+    }
+
+    // Fan seat path lookup
+    function lookupSeatRoute() {
+      const seat = document.getElementById('fan-seat-input').value;
+      const out = document.getElementById('fan-seat-output');
+      out.classList.remove('hidden');
+      out.innerHTML = `<strong>Plotted seat locator route for:</strong> ${seat}<br/>Path: Enter via <strong>Gate B (West)</strong>, take elevator lobby West 2 directly to row corridor Section 104. ETA: 4 minutes.`;
+    }
+
+    // Code Amber
+    function triggerAmberLockdown() {
+      const desc = document.getElementById('amber-desc').value;
+      const loc = document.getElementById('amber-loc').value;
+      
+      fetch('/api/v1/incidents', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          title: "Code Amber missing child alert",
+          location: loc,
+          severity: "High",
+          description: "Missing child visual descriptors: " + desc
+        })
+      }).then(() => {
+        document.getElementById('amber-form').classList.add('hidden');
+        const activePane = document.getElementById('amber-active-pane');
+        activePane.classList.remove('hidden');
+        document.getElementById('amber-active-details').innerText = `Child Visuals: ${desc} | Last Seen: ${loc}. Redirection and gate warnings active.`;
+      });
+    }
+    
+    function cancelAmberLockdown() {
+      document.getElementById('amber-form').classList.remove('hidden');
+      document.getElementById('amber-active-pane').classList.add('hidden');
+    }
+
+    // Dispatch incident
+    function dispatchIncident() {
+      const title = document.getElementById('inc-title').value;
+      const loc = document.getElementById('inc-loc').value;
+      const desc = document.getElementById('inc-desc').value;
+
+      fetch('/api/v1/incidents', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          title: title,
+          location: loc,
+          severity: "High",
+          description: desc
+        })
+      }).then(() => {
+        document.getElementById('inc-title').value = "";
+        document.getElementById('inc-loc').value = "";
+        document.getElementById('inc-desc').value = "";
+        loadSecurityIncidents();
+      });
+    }
+
+    function loadSecurityIncidents() {
+      fetch('/api/v1/incidents')
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById('security-inc-list');
+          container.innerHTML = "";
+          data.forEach(inc => {
+            if(inc.status !== "Resolved") {
+              container.innerHTML += `
+                <div class="p-3 bg-slate-900 border border-cardBorder rounded space-y-2">
+                  <div class="flex justify-between font-bold text-white">
+                    <span>${inc.title}</span>
+                    <span class="text-brandRed font-mono">${inc.severity} Severity</span>
+                  </div>
+                  <p class="text-slate-400">Location: ${inc.location} | Details: ${inc.description}</p>
+                  <p class="p-2 bg-slate-950 rounded text-slate-500 text-[10px] font-mono">${inc.ai_recommendation || "Pending recommendation..."}</p>
+                  <button onclick="resolveIncident('${inc.id}')" class="px-2 py-0.5 rounded bg-brandEmerald/10 text-brandEmerald border border-brandEmerald/30">Resolve</button>
+                </div>
+              `;
+            }
+          });
+        });
+    }
+    
+    function resolveIncident(id) {
+      fetch(`/api/v1/incidents/${id}/resolve`, { method: 'POST' })
+        .then(() => loadSecurityIncidents());
+    }
+
+    // PA Announcer
+    function compilePAAnnouncement() {
+      const type = document.getElementById('pa-type').value;
+      fetch(`/api/v1/reports/announcement?type=${type}`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          const out = document.getElementById('pa-output');
+          out.classList.remove('hidden');
+          out.innerHTML = `<strong>Volume: ${data.recommended_volume} | Duration: ${data.duration_seconds}s</strong><br/><p class="mt-1 text-slate-300">"${data.announcement_text}"</p>`;
+        });
+    }
+
+    // Daily briefing
+    function compileDailyBriefing() {
+      fetch('/api/v1/reports/daily', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          const out = document.getElementById('briefing-output');
+          out.classList.remove('hidden');
+          out.innerHTML = `<strong>${data.title}</strong><p class="text-slate-400 italic font-bold my-1">"${data.summary}"</p>`;
+          data.sections.forEach(sec => {
+            out.innerHTML += `<div class="mt-2"><span class="text-brandGold block font-bold">${sec.header}</span><p class="text-slate-300">${sec.content}</p></div>`;
+          });
+        });
+    }
+
+    // Q&A Chat Client
+    function submitChatQuery() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      const agent = document.getElementById('chat-agent').value;
+      if(!text) return;
+      input.value = "";
+
+      const logs = document.getElementById('chat-logs');
+      logs.innerHTML += `
+        <div class="flex flex-col items-end gap-1">
+          <span class="text-[9px] font-mono text-slate-500 uppercase">You</span>
+          <div class="p-3 rounded-lg bg-slate-900 border border-cardBorder text-slate-100 font-mono text-xs max-w-[80%]">${text}</div>
+        </div>
+      `;
+
+      fetch('/api/v1/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          session_id: "console_web",
+          agent_role: agent,
+          message: text
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        logs.innerHTML += `
+          <div class="flex flex-col items-start gap-1">
+            <span class="text-[9px] font-mono text-slate-500 uppercase">${data.agent_role} Agent</span>
+            <div class="p-3 rounded-lg bg-brandRed/5 border border-brandRed/10 text-slate-300 font-mono text-xs max-w-[80%]">${data.response}</div>
+          </div>
+        `;
+        logs.scrollTop = logs.scrollHeight;
+      });
+    }
+
+    // Init scripts
+    lucide.createIcons();
+    connectWebsocket();
+    loadSecurityIncidents();
+  </script>
+</body>
+</html>
